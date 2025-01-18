@@ -7,7 +7,7 @@
 // Model URL from Teachable Machine
 //**************************************************
 //* as before, paste your lnk below
-let URL = "paste your link here";
+let URL = "https://teachablemachine.withgoogle.com/models/CMBhs4EAW/";
 
 
 
@@ -97,13 +97,13 @@ async function predict() {
 function checkPose(prediction, video) {
     const time = video.currentTime;
     const prob = prediction.probability;
-    
+
     // Only respond to pose1 through pose5 labels
     const poseNumber = prediction.className.toLowerCase().replace(/[^0-9]/g, '');
     const isPoseLabel = prediction.className.toLowerCase().includes('pose') && poseNumber >= 1 && poseNumber <= 5;
-    
+
     if (!isPoseLabel) return;
-    
+
     if (!poseStates[`pose${poseNumber}`]) {
         poseStates[`pose${poseNumber}`] = {
             triggered: false,
@@ -114,7 +114,7 @@ function checkPose(prediction, video) {
 
     if (prob > 0.8 && !explosionActive) {
         const poseState = poseStates[`pose${poseNumber}`];
-        
+
         switch(poseNumber) {
             case '1':
                 if (time >= 0.9 && time <= 3.0 && !poseState.triggered) {
@@ -230,7 +230,7 @@ async function playInstructionVideo() {
     if (model) {
         processFrame();
     } else {
-        console.log("Please start webcam first to load the model");
+        console.log("https://teachablemachine.withgoogle.com/models/CMBhs4EAW/");
     }
 }
 
