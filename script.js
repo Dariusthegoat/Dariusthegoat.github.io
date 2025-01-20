@@ -4,24 +4,16 @@
  * Created: January 2024
  */
 
-// Model URL from Teachable Machine
-//**************************************************
-//* as before, paste your lnk below
-let URL = "https://teachablemachine.withgoogle.com/models/0-dLiXWh5/";
-
-
-
+let URL = "https://teachablemachine.withgoogle.com/models/0-dLiXWh5/"; // Replace with your model URL
 
 let model, webcam, ctx, labelContainer, maxPredictions;
 
-// Dynamic pose tracking
 let poseStates = {};
 let explosionActive = false;
 let explosionSound = new Audio('explsn.mp3');
 
 function setModelURL(url) {
     URL = url;
-    // Reset states when URL changes
     poseStates = {};
     explosionActive = false;
 }
@@ -84,7 +76,6 @@ async function predict() {
                 prediction[i].className + ": " + prediction[i].probability.toFixed(2);
             labelContainer.childNodes[i].innerHTML = classPrediction;
 
-            // Check pose dynamically
             checkPose(prediction[i], video);
         }
 
@@ -98,7 +89,6 @@ function checkPose(prediction, video) {
     const time = video.currentTime;
     const prob = prediction.probability;
 
-    // Only respond to pose1 through pose5 labels
     const poseNumber = prediction.className.toLowerCase().replace(/[^0-9]/g, '');
     const isPoseLabel = prediction.className.toLowerCase().includes('pose') && poseNumber >= 1 && poseNumber <= 5;
 
@@ -185,8 +175,10 @@ function drawPose(pose, explode) {
 
 async function playInstructionVideo() {
     const video = document.getElementById('instructionVideo');
-    const videoSrc = video.getAttribute('data-video-src') || 'vid.mp4';
+    
+    const videoSrc = video.getAttribute('data-video-src') || 'vid.mp4'; 
     video.src = videoSrc;
+    
     const videoContainer = video.parentElement;
 
     video.addEventListener('timeupdate', () => {
@@ -230,7 +222,7 @@ async function playInstructionVideo() {
     if (model) {
         processFrame();
     } else {
-        console.log("https://teachablemachine.withgoogle.com/models/0-dLiXWh5/");
+        console.log("Model is not loaded yet.");
     }
 }
 
