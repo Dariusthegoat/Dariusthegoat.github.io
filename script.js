@@ -4,14 +4,18 @@
  * Created: January 2024
  */
 
-let URL = "https://teachablemachine.withgoogle.com/models/0-dLiXWh5/"; // Replace with your model URL
+// Model URL from Teachable Machine
+//**************************************************
+//* as before, paste your link below
+let URL = "https://teachablemachine.withgoogle.com/models/0-dLiXWh5/";
 
+// Global variables
 let model, webcam, ctx, labelContainer, maxPredictions;
-
-let poseStates = {};
+let poseStates = {};  // Track states for each pose
 let explosionActive = false;
 let explosionSound = new Audio('explsn.mp3');
 
+// Initialize the model URL
 function setModelURL(url) {
     URL = url;
     poseStates = {};
@@ -76,6 +80,7 @@ async function predict() {
                 prediction[i].className + ": " + prediction[i].probability.toFixed(2);
             labelContainer.childNodes[i].innerHTML = classPrediction;
 
+            // Check pose dynamically
             checkPose(prediction[i], video);
         }
 
@@ -89,16 +94,15 @@ function checkPose(prediction, video) {
     const time = video.currentTime;
     const prob = prediction.probability;
 
+    // Extract pose number
     const poseNumber = prediction.className.toLowerCase().replace(/[^0-9]/g, '');
-    const isPoseLabel = prediction.className.toLowerCase().includes('pose') && poseNumber >= 1 && poseNumber <= 5;
+    const isPoseLabel = prediction.className.toLowerCase().includes('pose') && poseNumber >= 1 && poseNumber <= 6;
 
     if (!isPoseLabel) return;
 
     if (!poseStates[`pose${poseNumber}`]) {
         poseStates[`pose${poseNumber}`] = {
-            triggered: false,
-            firstWindowTriggered: false,
-            secondWindowTriggered: false
+            triggered: false
         };
     }
 
@@ -107,35 +111,32 @@ function checkPose(prediction, video) {
 
         switch(poseNumber) {
             case '1':
-                if (time >= 0.9 && time <= 3.0 && !poseState.triggered) {
+                if (time >= 54 && time <= 55 && !poseState.triggered) {
                     triggerExplosion(poseState);
                 }
                 break;
             case '2':
-                if (time >= 5.5 && time <= 7.5 && !poseState.triggered) {
+                if (time >= 55 && time <= 56 && !poseState.triggered) {
                     triggerExplosion(poseState);
                 }
                 break;
             case '3':
-                if ((time >= 11.5 && time <= 13.0 && !poseState.firstWindowTriggered) ||
-                    (time >= 17.5 && time <= 19.5 && !poseState.secondWindowTriggered)) {
-                    if (time <= 13.0) {
-                        poseState.firstWindowTriggered = true;
-                    } else {
-                        poseState.secondWindowTriggered = true;
-                    }
-                    explosionActive = true;
-                    playExplosionSound();
-                    setTimeout(() => { explosionActive = false; }, 300);
+                if (time >= 64 && time <= 65 && !poseState.triggered) {
+                    triggerExplosion(poseState);
                 }
                 break;
             case '4':
-                if (time >= 15.5 && time <= 16.6 && !poseState.triggered) {
+                if (time >= 69 && time <= 70 && !poseState.triggered) {
                     triggerExplosion(poseState);
                 }
                 break;
             case '5':
-                if (time >= 19.5 && !poseState.triggered) {
+                if (time >= 74 && time <= 75 && !poseState.triggered) {
+                    triggerExplosion(poseState);
+                }
+                break;
+            case '6':
+                if (time >= 90 && time <= 91 && !poseState.triggered) {
                     triggerExplosion(poseState);
                 }
                 break;
@@ -175,10 +176,8 @@ function drawPose(pose, explode) {
 
 async function playInstructionVideo() {
     const video = document.getElementById('instructionVideo');
-    
-    const videoSrc = video.getAttribute('data-video-src') || 'vid.mp4'; 
+    const videoSrc = video.getAttribute('data-video-src') || 'vid.mp4';
     video.src = videoSrc;
-    
     const videoContainer = video.parentElement;
 
     video.addEventListener('timeupdate', () => {
@@ -222,7 +221,7 @@ async function playInstructionVideo() {
     if (model) {
         processFrame();
     } else {
-        console.log("Model is not loaded yet.");
+        console.log("https://teachablemachine.withgoogle.com/models/0-dLiXWh5/");
     }
 }
 
