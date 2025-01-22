@@ -106,40 +106,29 @@ function checkPose(prediction, video) {
         };
     }
 
-    if (prob > 0.8 && !explosionActive) {
-        const poseState = poseStates[`pose${poseNumber}`];
+    const poseState = poseStates[`pose${poseNumber}`];
 
-        switch(poseNumber) {
-            case '1':
-                if (time >= 22 && time <= 23 && !poseState.triggered) {
-                    triggerExplosion(poseState);
-                }
-                break;
-            case '2':
-                if (time >= 25 && time <= 26 && !poseState.triggered) {
-                    triggerExplosion(poseState);
-                }
-                break;
-            case '3':
-                if (time >= 33 && time <= 34 && !poseState.triggered) {
-                    triggerExplosion(poseState);
-                }
-                break;
-            case '4':
-                if (time >= 37 && time <= 38 && !poseState.triggered) {
-                    triggerExplosion(poseState);
-                }
-                break;
-            case '5':
-                if (time >= 42 && time <= 43 && !poseState.triggered) {
-                    triggerExplosion(poseState);
-                }
-                break;
-            case '6':
-                if (time >= 58 && time <= 59 && !poseState.triggered) {
-                    triggerExplosion(poseState);
-                }
-                break;
+    // Define time windows for poses
+    const poseTimeWindows = {
+        '1': [22, 23],
+        '2': [25, 26],
+        '3': [33, 34],
+        '4': [37, 38],
+        '5': [42, 43],
+        '6': [58, 59],
+    };
+
+    if (poseTimeWindows[poseNumber]) {
+        const [startTime, endTime] = poseTimeWindows[poseNumber];
+
+        // Reset pose state if outside its valid time window
+        if (time < startTime || time > endTime) {
+            poseState.triggered = false;
+        }
+
+        // Trigger explosion if within the time window and probability is high enough
+        if (time >= startTime && time <= endTime && prob > 0.8 && !poseState.triggered && !explosionActive) {
+            triggerExplosion(poseState);
         }
     }
 }
@@ -187,58 +176,13 @@ async function playInstructionVideo() {
             `Time: ${minutes}:${seconds.toString().padStart(2, '0')}`;
     });
 
-    const videoCanvas = document.createElement('canvas');
-    videoCanvas.id = 'poseCanvas';
-    videoCanvas.style.position = 'absolute';
-    videoCanvas.style.left = '0';
-    videoCanvas.style.top = '0';
-    videoCanvas.width = 600;
-    videoCanvas.height = 450;
-
-    videoContainer.style.position = 'relative';
-    videoContainer.appendChild(videoCanvas);
-    const videoCtx = videoCanvas.getContext('2d');
-
     video.play();
-
-    async function processFrame() {
-        if (!video.paused && !video.ended) {
-            try {
-                const { pose, posenetOutput } = await model.estimatePose(video);
-                videoCtx.clearRect(0, 0, videoCanvas.width, videoCanvas.height);
-
-                if (pose) {
-                    tmPose.drawKeypoints(pose.keypoints, 0.6, videoCtx);
-                    tmPose.drawSkeleton(pose.keypoints, 0.6, videoCtx);
-                }
-            } catch (error) {
-                console.error('Pose detection error:', error);
-            }
-            requestAnimationFrame(processFrame);
-        }
-    }
-
-    if (model) {
-        processFrame();
-    } else {
-        console.log("https://teachablemachine.withgoogle.com/models/0-dLiXWh5/");
-    }
 }
 
 function stopInstructionVideo() {
     const video = document.getElementById('instructionVideo');
     video.pause();
     video.currentTime = 0;
-    const canvas = video.parentElement.querySelector('canvas');
-    if (canvas) {
-        canvas.remove();
-    }
-    pose1Triggered = false;
-    pose2Triggered = false;
-    pose3FirstWindowTriggered = false;
-    pose3SecondWindowTriggered = false;
-    pose4Triggered = false;
-    pose5Triggered = false;
 }
 
 function stopWebcam() {
