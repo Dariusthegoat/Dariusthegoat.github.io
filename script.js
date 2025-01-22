@@ -5,13 +5,11 @@
  */
 
 // Model URL from Teachable Machine
-//**************************************************
-//* as before, paste your link below
 let URL = "https://teachablemachine.withgoogle.com/models/0-dLiXWh5/";
 
 // Global variables
 let model, webcam, ctx, labelContainer, maxPredictions;
-let poseStates = {};  // Track states for each pose
+let poseStates = {}; // Track states for each pose
 let explosionActive = false;
 let explosionSound = new Audio('explsn.mp3');
 
@@ -94,7 +92,6 @@ function checkPose(prediction, video) {
     const time = video.currentTime;
     const prob = prediction.probability;
 
-    // Extract pose number
     const poseNumber = prediction.className.toLowerCase().replace(/[^0-9]/g, '');
     const isPoseLabel = prediction.className.toLowerCase().includes('pose') && poseNumber >= 1 && poseNumber <= 6;
 
@@ -109,7 +106,7 @@ function checkPose(prediction, video) {
     if (prob > 0.8 && !explosionActive) {
         const poseState = poseStates[`pose${poseNumber}`];
 
-        switch(poseNumber) {
+        switch (poseNumber) {
             case '1':
                 if (time >= 22 && time <= 23 && !poseState.triggered) {
                     triggerExplosion(poseState);
@@ -148,7 +145,9 @@ function triggerExplosion(poseState) {
     explosionActive = true;
     poseState.triggered = true;
     playExplosionSound();
-    setTimeout(() => { explosionActive = false; }, 300);
+    setTimeout(() => {
+        explosionActive = false;
+    }, 300);
 }
 
 function drawPose(pose, explode) {
@@ -176,52 +175,27 @@ function drawPose(pose, explode) {
 
 async function playInstructionVideo() {
     const video = document.getElementById('instructionVideo');
+    if (!video) {
+        console.error('Instruction video element not found.');
+        return;
+    }
+
     const videoSrc = video.getAttribute('data-video-src') || 'vid.mp4';
     video.src = videoSrc;
-    const videoContainer = video.parentElement;
+    video.muted = true; // Ensure autoplay compliance
 
     video.addEventListener('timeupdate', () => {
         const minutes = Math.floor(video.currentTime / 60);
         const seconds = Math.floor(video.currentTime % 60);
-        document.getElementById('videoTime').textContent = 
+        document.getElementById('videoTime').textContent =
             `Time: ${minutes}:${seconds.toString().padStart(2, '0')}`;
     });
 
-    const videoCanvas = document.createElement('canvas');
-    videoCanvas.id = 'poseCanvas';
-    videoCanvas.style.position = 'absolute';
-    videoCanvas.style.left = '0';
-    videoCanvas.style.top = '0';
-    videoCanvas.width = 600;
-    videoCanvas.height = 450;
-
-    videoContainer.style.position = 'relative';
-    videoContainer.appendChild(videoCanvas);
-    const videoCtx = videoCanvas.getContext('2d');
-
-    video.play();
-
-    async function processFrame() {
-        if (!video.paused && !video.ended) {
-            try {
-                const { pose, posenetOutput } = await model.estimatePose(video);
-                videoCtx.clearRect(0, 0, videoCanvas.width, videoCanvas.height);
-
-                if (pose) {
-                    tmPose.drawKeypoints(pose.keypoints, 0.6, videoCtx);
-                    tmPose.drawSkeleton(pose.keypoints, 0.6, videoCtx);
-                }
-            } catch (error) {
-                console.error('Pose detection error:', error);
-            }
-            requestAnimationFrame(processFrame);
-        }
-    }
-
-    if (model) {
-        processFrame();
-    } else {
-        console.log("https://teachablemachine.withgoogle.com/models/0-dLiXWh5/");
+    try {
+        await video.play();
+        console.log('Video started playing.');
+    } catch (error) {
+        console.error('Error starting video playback:', error);
     }
 }
 
@@ -233,12 +207,7 @@ function stopInstructionVideo() {
     if (canvas) {
         canvas.remove();
     }
-    pose1Triggered = false;
-    pose2Triggered = false;
-    pose3FirstWindowTriggered = false;
-    pose3SecondWindowTriggered = false;
-    pose4Triggered = false;
-    pose5Triggered = false;
+    poseStates = {};
 }
 
 function stopWebcam() {
