@@ -7,7 +7,7 @@
 // Model URL from Teachable Machine
 //**************************************************
 //* as before, paste your link below
-let URL = "https://teachablemachine.withgoogle.com/models/0-dLiXWh5/";
+let URL = "https://teachablemachine.withgoogle.com/models/t594TCPs4/";
 
 // Global variables
 let model, webcam, ctx, labelContainer, maxPredictions;
